@@ -14,7 +14,8 @@ import { useState } from "react";
 const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
 
-  let { id } = useParams();
+  let { id } = useParams(); // getting the product id from the url
+
   const productItemQuery = useQuery({
     queryKey: ["product", id],
     queryFn: getProductDetailsById,
@@ -59,7 +60,7 @@ const ProductDetailsPage = () => {
                 >
                   <Minus />
                 </Button>
-                <Input className="w-10 text-center" value={quantity} />
+                <Input className="w-10 text-center" readOnly value={quantity} />
                 <Button
                   variant={"ghost"}
                   onClick={() => setQuantity(quantity + 1)}

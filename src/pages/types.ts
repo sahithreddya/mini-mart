@@ -26,4 +26,13 @@ type User = {
   updatedAt: string;
 };
 
-export { type Product, type User };
+type UserProfile = {
+  id: number;
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+  avatar: string;
+};
+
+export { type Product, type User, type UserProfile };

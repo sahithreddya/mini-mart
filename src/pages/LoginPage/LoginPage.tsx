@@ -13,9 +13,11 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { useAuth } from "../../Context/AuthProvider";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("maria@mail.com");
+  const auth = useAuth();
+  const [email, setEmail] = useState("john@mail.com");
   const [password, setPassword] = useState("");
 
   const queryClient = useQueryClient();
@@ -25,6 +27,8 @@ const LoginPage = () => {
     onSuccess: (data) => {
       console.log(data);
       queryClient.setQueryData(["userTokenData"], data);
+      auth.setToken(data.access_token); // setting token in local storage
+
       getUserProfile(data.access_token).then((userProfile) => {
         queryClient.setQueryData(["userProfile"], userProfile);
       });
@@ -65,7 +69,7 @@ const LoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
-              placeholder="12345"
+              placeholder="changeme"
               type="password"
               name="password"
               id="password"
