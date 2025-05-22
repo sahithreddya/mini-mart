@@ -2,6 +2,7 @@
 
 A small e-commerce demo built with React to explore and demonstrate core concepts of **TanStack Query v5** for server state management.
 
+![image](https://github.com/user-attachments/assets/efa505d8-9fba-4163-81c9-4e278f9a8d73)
 
 <br>
 
@@ -13,3 +14,5 @@ A small e-commerce demo built with React to explore and demonstrate core concept
 * **React Router:** Navigation
 * **Tailwind CSS + Shadcn/UI:** Styling and Components
 * **Fake Store API:** Data Source
+
+
