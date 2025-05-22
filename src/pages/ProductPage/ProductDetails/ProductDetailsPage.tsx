@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { Button } from "../../../components/ui/button";
 import {
@@ -9,50 +9,59 @@ import {
 } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { Plus, Minus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../../Context/AuthProvider";
+import { getProductDetailsById } from "../../../APIs";
 
 const ProductDetailsPage = () => {
+  const queryClient = useQueryClient();
+  const auth = useAuth();
   const [quantity, setQuantity] = useState(1);
 
   let { id } = useParams(); // getting the product id from the url
 
-  const productItemQuery = useQuery({
-    queryKey: ["product", id],
+  useEffect(() => {
+    queryClient.resetQueries({
+      queryKey: ["product", auth?.token, Number(id)],
+      exact: true,
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["product", Number(id)],
+    });
+  }, []); // revalidating on mount
+
+  const productItemQuery = useSuspenseQuery({
+    queryKey: ["product", Number(id)],
     queryFn: getProductDetailsById,
   });
 
-  if (productItemQuery?.isPending) {
-    console.log("cold productDetails data");
-    return <div>Loading</div>;
-  }
   if (productItemQuery?.isError)
     return <div>Error: {productItemQuery.error.message}</div>;
   else {
     if (!productItemQuery.isFetching)
       console.log("serving cached productDetails data");
     else console.log("stale...fetching fresh productDetails data");
-
-    console.log("productItemQuery", productItemQuery.data);
   }
+  const productData = productItemQuery.data;
 
   return (
     <>
       <h1 className="text-4xl font-bold text-center py-10">Product ID: {id}</h1>
-      <div className="flex flex-col gap-8">
-        <Card className="flex flex-1/3 flex-row w-[80%] mx-auto">
-          <CardContent className="">
+      <div className="flex flex-col gap-8 items-center">
+        {/* {productItemQuery?.isFetching && <p>Fetching product...</p>} */}
+
+        <Card className="flex flex-row w-[80%] mx-auto gap-6 p-6">
+          <CardContent className="flex-2/3 p-0">
             <img
               className="w-100"
-              src={productItemQuery?.data?.images[0]}
-              alt={productItemQuery?.data?.title}
+              src={productData?.images[0]}
+              alt={productData?.title}
             />
           </CardContent>
-          <CardContent className="flex flex-2/3 flex-col gap-8">
-            <CardTitle className="text-xl">
-              {productItemQuery?.data?.title}
-            </CardTitle>
-            <p className="text-3xl">${productItemQuery?.data?.price}</p>
-            <div className="flex gap-[10%]">
+          <CardContent className="flex flex-1/3 flex-col gap-8 p-0">
+            <CardTitle className="text-xl">{productData?.title}</CardTitle>
+            <p className="text-3xl">${productData?.price}</p>
+            <div className="flex justify-between">
               <div className="flex gap-2 items-center">
                 <Button
                   variant={"ghost"}
@@ -70,9 +79,7 @@ const ProductDetailsPage = () => {
               </div>
               <Button onClick={() => {}}>Add to cart</Button>
             </div>
-            <CardDescription>
-              {productItemQuery?.data?.description}
-            </CardDescription>
+            <CardDescription>{productData?.description}</CardDescription>
           </CardContent>
         </Card>
       </div>
@@ -81,20 +88,3 @@ const ProductDetailsPage = () => {
 };
 
 export default ProductDetailsPage;
-
-export const getProductDetailsById = async ({
-  queryKey,
-}: {
-  queryKey: any;
-}) => {
-  const [_, productId] = queryKey;
-  const response = await fetch(
-    `http://localhost:3000/api/v1/products/${productId}`
-  );
-  if (!response.ok) {
-    throw new Error("Error while fetching product details");
-  }
-  console.log("fetched product data", response);
-
-  return response.json();
-};

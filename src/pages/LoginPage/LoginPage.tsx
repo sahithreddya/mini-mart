@@ -10,28 +10,27 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useAuth } from "../../Context/AuthProvider";
+import { getUserProfile, loginUser } from "../../APIs";
 
 const LoginPage = () => {
   const auth = useAuth();
   const [email, setEmail] = useState("john@mail.com");
   const [password, setPassword] = useState("");
 
-  const queryClient = useQueryClient();
+  useQuery({
+    queryKey: ["profile"],
+    queryFn: getUserProfile,
+    enabled: !!auth.token,
+  });
 
   const loginMutation = useMutation({
-    mutationFn: loginFn,
+    mutationFn: loginUser,
     onSuccess: (data) => {
-      console.log(data);
-      queryClient.setQueryData(["userTokenData"], data);
       auth.setToken(data.access_token); // setting token in local storage
-
-      getUserProfile(data.access_token).then((userProfile) => {
-        queryClient.setQueryData(["userProfile"], userProfile);
-      });
       navigate(`/products`);
     },
     onError: (error) => {
@@ -50,77 +49,44 @@ const LoginPage = () => {
 
   return (
     <>
-      <div className="">
-        <h1 className="text-center text-3xl font-bold mt-20 mb-10">
-          Welcome to the <br /> Mini Store
-        </h1>
-        <Card className="w-100 mx-auto">
-          <CardHeader>
-            <CardTitle>Login</CardTitle>
-            <CardDescription>Enter your email and password</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <Input
-              placeholder="user@example.com"
-              type="email"
-              name="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Input
-              placeholder="changeme"
-              type="password"
-              name="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleLogin}>Login</Button>
-          </CardFooter>
-        </Card>
-      </div>
+      {auth.token ? (
+        <Navigate to="/products" />
+      ) : (
+        <div className="">
+          <h1 className="text-center text-3xl font-bold mt-20 mb-10">
+            Welcome to the <br /> Mini Store
+          </h1>
+          <Card className="w-100 mx-auto">
+            <CardHeader>
+              <CardTitle>Login</CardTitle>
+              <CardDescription>Enter your email and password</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
+              <Input
+                placeholder="user@example.com"
+                type="email"
+                name="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input
+                placeholder="changeme"
+                type="password"
+                name="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleLogin}>Login</Button>
+            </CardFooter>
+          </Card>
+        </div>
+      )}
     </>
   );
 };
 
 export default LoginPage;
-
-const loginFn = async ({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) => {
-  const response = await fetch("http://localhost:3000/api/v1/auth/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error("Login Failed: " + response.statusText);
-  }
-  return response.json();
-};
-
-const getUserProfile = async (access_token: string) => {
-  const response = await fetch("http://localhost:3000/api/v1/auth/profile", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${access_token}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error("Fetching user profile failed: " + response.statusText);
-  }
-  return response.json();
-};

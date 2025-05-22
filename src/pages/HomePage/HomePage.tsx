@@ -11,20 +11,11 @@ const HomePage = () => {
 
   const userData = queryClient.getQueryData(["userProfile"]);
 
-  useEffect(() => {
-    if (!auth?.token) {
-      console.log("not logged in");
-      navigate("/login");
-    } else {
-      console.log("user already logged in ", userData);
-
-      navigate(`/products`);
-    }
-  }, []);
+  console.log("in home page");
 
   return (
     <>
-      <h1>redirecting...</h1>
+      <h1>homepage...</h1>
     </>
   );
 };

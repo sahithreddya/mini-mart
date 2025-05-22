@@ -1,17 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../../Context/AuthProvider";
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
 } from "../../components/ui/card";
+import { getUserProfile } from "../../APIs";
 const ProfilePage = () => {
-  const auth = useAuth();
-  let profileQuery;
-
-  profileQuery = useQuery({
-    queryKey: ["profile", auth.token],
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
     queryFn: getUserProfile,
   });
 
@@ -54,17 +51,6 @@ const ProfilePage = () => {
       </div>
     </>
   );
-};
-
-const getUserProfile = ({ queryKey }: { queryKey: any }) => {
-  const [_, access_token] = queryKey;
-  return fetch("http://localhost:3000/api/v1/auth/profile", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${access_token}`,
-    },
-  }).then((res) => res.json());
 };
 
 export default ProfilePage;

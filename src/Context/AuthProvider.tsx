@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-const AuthContext = createContext<{
+export const AuthContext = createContext<{
   token: string | null;
   setToken: (token: string | null) => void;
   logout: () => void;
@@ -8,19 +8,22 @@ const AuthContext = createContext<{
 
 const AuthProvider = ({ children }: any) => {
   // State to hold the authentication token
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("accessToken"));
+
+  console.log("token exists?: ", token);
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem("token", token);
+      localStorage.setItem("accessToken", token);
     } else {
-      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
     }
   }, [token]);
 
   const logout = () => {
     setToken(null);
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   };
 
   // Memoized value of the authentication context

@@ -5,15 +5,21 @@ type Product = {
   price: number;
   images: string[];
   slug: string;
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-    image: string;
-  };
+  category: ProductCategory;
   createdAt: string;
   updatedAt: string;
 };
+
+type ProductCategory = {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+  creationAt?: string;
+  updatedAt?: string;
+};
+
+type Cart = { id: number; quantity: number }[];
 
 type User = {
   id: number;
@@ -35,4 +41,10 @@ type UserProfile = {
   avatar: string;
 };
 
-export { type Product, type User, type UserProfile };
+export {
+  type Product,
+  type ProductCategory,
+  type User,
+  type UserProfile,
+  type Cart,
+};

@@ -26,7 +26,7 @@ export class AuthService {
   generateAccessToken(user: User) {
     const payload: Payload = { sub: user.id };
     return this.jwtService.sign(payload, {
-      expiresIn: '20d',
+      expiresIn: '10s', // Setting a shorter expiration to validate refresh token API flow
       secret: this.configService.accessSecretKey,
     });
   }
